@@ -4,7 +4,6 @@ from django.db.models.signals import post_save
 from django.dispatch import receiver
 
 
-
 class SessionYearModel(models.Model):
     id = models.AutoField(primary_key=True)
     session_start_year = models.DateField()
@@ -12,12 +11,10 @@ class SessionYearModel(models.Model):
     objects = models.Manager()
 
 
-
 # Overriding the Default Django Auth User and adding One More Field (user_type)
 class CustomUser(AbstractUser):
     user_type_data = ((1, "HOD"), (2, "Staff"), (3, "Student"))
     user_type = models.CharField(default=1, choices=user_type_data, max_length=10)
-
 
 
 class AdminHOD(models.Model):
@@ -37,7 +34,6 @@ class Staffs(models.Model):
     objects = models.Manager()
 
 
-
 class Courses(models.Model):
     id = models.AutoField(primary_key=True)
     course_name = models.CharField(max_length=255)
@@ -49,7 +45,6 @@ class Courses(models.Model):
 	#     return self.course_name
 
 
-
 class Subjects(models.Model):
     id =models.AutoField(primary_key=True)
     subject_name = models.CharField(max_length=255)
@@ -58,7 +53,6 @@ class Subjects(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     objects = models.Manager()
-
 
 
 class Students(models.Model):
@@ -138,7 +132,6 @@ class FeedBackStaffs(models.Model):
     objects = models.Manager()
 
 
-
 class NotificationStudent(models.Model):
     id = models.AutoField(primary_key=True)
     student_id = models.ForeignKey(Students, on_delete=models.CASCADE)
@@ -150,7 +143,7 @@ class NotificationStudent(models.Model):
 
 class NotificationStaffs(models.Model):
     id = models.AutoField(primary_key=True)
-    stafff_id = models.ForeignKey(Staffs, on_delete=models.CASCADE)
+    staff_id = models.ForeignKey(Staffs, on_delete=models.CASCADE)
     message = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -168,14 +161,12 @@ class StudentResult(models.Model):
     objects = models.Manager()
 
 
-#Creating Django Signals
-
-# It's like trigger in database. It will run only when Data is Added in CustomUser model
-
+#   Creating Django Signals
+#   It's like trigger in database. It will run only when Data is Added in CustomUser model
 @receiver(post_save, sender=CustomUser)
-# Now Creating a Function which will automatically insert data in HOD, Staff or Student
+#   Now Creating a Function which will automatically insert data in HOD, Staff or Student
 def create_user_profile(sender, instance, created, **kwargs):
-    # if Created is true (Means Data Inserted)
+    #   if Created is true (Means Data Inserted)
     if created:
         # Check the user_type and insert the data in respective tables
         if instance.user_type == 1:

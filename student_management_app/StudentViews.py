@@ -1,11 +1,10 @@
-from django.shortcuts import render, redirect
-from django.http import HttpResponse, HttpResponseRedirect
-from django.contrib import messages
-from django.core.files.storage import FileSystemStorage #To upload Profile Picture
-from django.urls import reverse
-import datetime # To Parse input DateTime into Python Date Time Object
+import datetime  # To Parse input DateTime into Python Date Time Object
 
-from student_management_app.models import CustomUser, Staffs, Courses, Subjects, Students, Attendance, AttendanceReport, LeaveReportStudent, FeedBackStudent, StudentResult
+from django.contrib import messages
+from django.shortcuts import render, redirect
+
+from student_management_app.models import CustomUser, Courses, Subjects, Students, Attendance, AttendanceReport, \
+    LeaveReportStudent, FeedBackStudent, StudentResult
 
 
 def student_home(request):
@@ -29,7 +28,7 @@ def student_home(request):
         data_present.append(attendance_present_count)
         data_absent.append(attendance_absent_count)
     
-    context={
+    context = {
         "total_attendance": total_attendance,
         "attendance_present": attendance_present,
         "attendance_absent": attendance_absent,
@@ -79,9 +78,10 @@ def student_view_attendance_post(request):
         attendance_reports = AttendanceReport.objects.filter(attendance_id__in=attendance, student_id=stud_obj)
 
         # for attendance_report in attendance_reports:
-        #     print("Date: "+ str(attendance_report.attendance_id.attendance_date), "Status: "+ str(attendance_report.status))
+        # print("Date: "+ str(attendance_report.attendance_id.attendance_date),
+        # "Status: "+ str(attendance_report.status))
 
-        # messages.success(request, "Attendacne View Success")
+        # messages.success(request, "Attendance View Success")
 
         context = {
             "subject_obj": subject_obj,

@@ -1,14 +1,12 @@
-from django.shortcuts import render, redirect
-from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
-from django.contrib import messages
-from django.core.files.storage import FileSystemStorage #To upload Profile Picture
-from django.urls import reverse
-from django.views.decorators.csrf import csrf_exempt
-from django.core import serializers
 import json
 
+from django.contrib import messages
+from django.http import HttpResponse, JsonResponse
+from django.shortcuts import render, redirect
+from django.views.decorators.csrf import csrf_exempt
 
-from student_management_app.models import CustomUser, Staffs, Courses, Subjects, Students, SessionYearModel, Attendance, AttendanceReport, LeaveReportStaff, FeedBackStaffs, StudentResult
+from student_management_app.models import CustomUser, Staffs, Courses, Subjects, Students, SessionYearModel, \
+    Attendance, AttendanceReport, LeaveReportStaff, FeedBackStaffs, StudentResult
 
 
 def staff_home(request):
@@ -19,13 +17,13 @@ def staff_home(request):
     for subject in subjects:
         course = Courses.objects.get(id=subject.course_id.id)
         course_id_list.append(course.id)
-    
+
     final_course = []
     # Removing Duplicate Course Id
     for course_id in course_id_list:
         if course_id not in final_course:
             final_course.append(course_id)
-    
+
     students_count = Students.objects.filter(course_id__in=final_course).count()
     subject_count = subjects.count()
 
@@ -35,7 +33,7 @@ def staff_home(request):
     staff = Staffs.objects.get(admin=request.user.id)
     leave_count = LeaveReportStaff.objects.filter(staff_id=staff.id, leave_status=1).count()
 
-    #Fetch Attendance Data by Subjects
+    # Fetch Attendance Data by Subjects
     subject_list = []
     attendance_list = []
     for subject in subjects:
@@ -50,11 +48,11 @@ def staff_home(request):
     for student in students_attendance:
         attendance_present_count = AttendanceReport.objects.filter(status=True, student_id=student.id).count()
         attendance_absent_count = AttendanceReport.objects.filter(status=False, student_id=student.id).count()
-        student_list.append(student.admin.first_name+" "+ student.admin.last_name)
+        student_list.append(student.admin.first_name + " " + student.admin.last_name)
         student_list_attendance_present.append(attendance_present_count)
         student_list_attendance_absent.append(attendance_absent_count)
 
-    context={
+    context = {
         "students_count": students_count,
         "attendance_count": attendance_count,
         "leave_count": leave_count,
@@ -66,7 +64,6 @@ def staff_home(request):
         "attendance_absent_list": student_list_attendance_absent
     }
     return render(request, "staff_template/staff_home_template.html", context)
-
 
 
 def staff_take_attendance(request):
@@ -98,7 +95,8 @@ def staff_apply_leave_save(request):
 
         staff_obj = Staffs.objects.get(admin=request.user.id)
         try:
-            leave_report = LeaveReportStaff(staff_id=staff_obj, leave_date=leave_date, leave_message=leave_message, leave_status=0)
+            leave_report = LeaveReportStaff(staff_id=staff_obj, leave_date=leave_date, leave_message=leave_message,
+                                            leave_status=0)
             leave_report.save()
             messages.success(request, "Applied for Leave.")
             return redirect('staff_apply_leave')
@@ -111,7 +109,7 @@ def staff_feedback(request):
     staff_obj = Staffs.objects.get(admin=request.user.id)
     feedback_data = FeedBackStaffs.objects.filter(staff_id=staff_obj)
     context = {
-        "feedback_data":feedback_data
+        "feedback_data": feedback_data
     }
     return render(request, "staff_template/staff_feedback_template.html", context)
 
@@ -153,12 +151,10 @@ def get_students(request):
     list_data = []
 
     for student in students:
-        data_small={"id":student.admin.id, "name":student.admin.first_name+" "+student.admin.last_name}
+        data_small = {"id": student.admin.id, "name": student.admin.first_name + " " + student.admin.last_name}
         list_data.append(data_small)
 
     return JsonResponse(json.dumps(list_data), content_type="application/json", safe=False)
-
-
 
 
 @csrf_exempt
@@ -179,7 +175,8 @@ def save_attendance_data(request):
     # print(student_ids)
     try:
         # First Attendance Data is Saved on Attendance Model
-        attendance = Attendance(subject_id=subject_model, attendance_date=attendance_date, session_year_id=session_year_model)
+        attendance = Attendance(subject_id=subject_model, attendance_date=attendance_date,
+                                session_year_id=session_year_model)
         attendance.save()
 
         for stud in json_student:
@@ -192,8 +189,6 @@ def save_attendance_data(request):
         return HttpResponse("Error")
 
 
-
-
 def staff_update_attendance(request):
     subjects = Subjects.objects.filter(staff_id=request.user.id)
     session_years = SessionYearModel.objects.all()
@@ -203,10 +198,9 @@ def staff_update_attendance(request):
     }
     return render(request, "staff_template/update_attendance_template.html", context)
 
+
 @csrf_exempt
 def get_attendance_dates(request):
-    
-
     # Getting Values from Ajax POST 'Fetch Student'
     subject_id = request.POST.get("subject")
     session_year = request.POST.get("session_year_id")
@@ -224,7 +218,8 @@ def get_attendance_dates(request):
     list_data = []
 
     for attendance_single in attendance:
-        data_small={"id":attendance_single.id, "attendance_date":str(attendance_single.attendance_date), "session_year_id":attendance_single.session_year_id.id}
+        data_small = {"id": attendance_single.id, "attendance_date": str(attendance_single.attendance_date),
+                      "session_year_id": attendance_single.session_year_id.id}
         list_data.append(data_small)
 
     return JsonResponse(json.dumps(list_data), content_type="application/json", safe=False)
@@ -241,7 +236,9 @@ def get_attendance_student(request):
     list_data = []
 
     for student in attendance_data:
-        data_small={"id":student.student_id.admin.id, "name":student.student_id.admin.first_name+" "+student.student_id.admin.last_name, "status":student.status}
+        data_small = {"id": student.student_id.admin.id,
+                      "name": student.student_id.admin.first_name + " " + student.student_id.admin.last_name,
+                      "status": student.status}
         list_data.append(data_small)
 
     return JsonResponse(json.dumps(list_data), content_type="application/json", safe=False)
@@ -257,13 +254,13 @@ def update_attendance_data(request):
     json_student = json.loads(student_ids)
 
     try:
-        
+
         for stud in json_student:
             # Attendance of Individual Student saved on AttendanceReport Model
             student = Students.objects.get(admin=stud['id'])
 
             attendance_report = AttendanceReport.objects.get(student_id=student, attendance_id=attendance)
-            attendance_report.status=stud['status']
+            attendance_report.status = stud['status']
 
             attendance_report.save()
         return HttpResponse("OK")
@@ -275,7 +272,7 @@ def staff_profile(request):
     user = CustomUser.objects.get(id=request.user.id)
     staff = Staffs.objects.get(admin=user)
 
-    context={
+    context = {
         "user": user,
         "staff": staff
     }
@@ -309,7 +306,6 @@ def staff_profile_update(request):
         except:
             messages.error(request, "Failed to Update Profile")
             return redirect('staff_profile')
-
 
 
 def staff_add_result(request):
@@ -346,7 +342,8 @@ def staff_add_result_save(request):
                 messages.success(request, "Result Updated Successfully!")
                 return redirect('staff_add_result')
             else:
-                result = StudentResult(student_id=student_obj, subject_id=subject_obj, subject_exam_marks=exam_marks, subject_assignment_marks=assignment_marks)
+                result = StudentResult(student_id=student_obj, subject_id=subject_obj, subject_exam_marks=exam_marks,
+                                       subject_assignment_marks=assignment_marks)
                 result.save()
                 messages.success(request, "Result Added Successfully!")
                 return redirect('staff_add_result')
